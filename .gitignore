@@ -1,7 +1,6 @@
 .venv/
 __pycache__/
 .ipynb_checkpoints/
-models/*.joblib
 models/*.pkl
 .env
 .claude/
