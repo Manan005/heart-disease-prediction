@@ -5,6 +5,11 @@ Cleaning decisions come from the EDA (notebooks/01_eda.ipynb):
 - `id`, `dataset` (hospital) and `num` are not used as features
 - `ca` and `thal` are dropped: almost only recorded in Cleveland, so their
   presence/absence mostly encodes the hospital, not the patient
+- `slope` is dropped for the same reason (98% of its missing values come from
+  Hungary and VA Long Beach)
+- missing categorical values are filled with the most frequent category, NOT a
+  separate "unknown" category: e.g. 75 of the 90 missing `fbs` values are Swiss
+  patients (93% disease rate), so "unknown" would act as a hidden hospital flag
 - fbs / exang are stored as "yes" / "no" text so they encode like other categories
 """
 
@@ -22,7 +27,7 @@ PROJECT_ROOT = Path(__file__).resolve().parent.parent
 RAW_DATA_PATH = PROJECT_ROOT / "data" / "raw" / "heart_disease_uci.csv"
 
 NUMERIC_FEATURES = ["age", "trestbps", "chol", "thalch", "oldpeak"]
-CATEGORICAL_FEATURES = ["sex", "cp", "fbs", "restecg", "exang", "slope"]
+CATEGORICAL_FEATURES = ["sex", "cp", "fbs", "restecg", "exang"]
 FEATURES = NUMERIC_FEATURES + CATEGORICAL_FEATURES
 TARGET = "target"
 
@@ -62,7 +67,8 @@ def split(df, test_size=0.2, random_state=RANDOM_STATE):
 
 
 def build_preprocessor():
-    """Imputation + scaling for numeric columns, imputation + one-hot for categorical.
+    """Median imputation + scaling for numeric columns,
+    most-frequent imputation + one-hot encoding for categorical columns.
 
     Nothing is fitted here; it learns medians/categories only when it is fitted
     on the training data (inside a model Pipeline), which prevents test-set leakage.
@@ -72,7 +78,7 @@ def build_preprocessor():
         ("scale", StandardScaler()),
     ])
     categorical = Pipeline([
-        ("impute", SimpleImputer(strategy="constant", fill_value="unknown")),
+        ("impute", SimpleImputer(strategy="most_frequent")),
         ("onehot", OneHotEncoder(handle_unknown="ignore", sparse_output=False)),
     ])
     return ColumnTransformer([
