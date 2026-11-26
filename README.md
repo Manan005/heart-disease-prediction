@@ -2,7 +2,7 @@
 
 An end-to-end machine learning project that estimates a patient's risk of heart disease from routine clinical data, from exploratory analysis to a deployed web app.
 
-**🔗 Live demo:** _coming soon_
+**🔗 Live demo:** [heart-disease-risk-manan.streamlit.app](https://heart-disease-risk-manan.streamlit.app/)
 
 ![App screenshot](assets/app_screenshot.png)
 
